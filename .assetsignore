@@ -1,0 +1,3 @@
+# not part of the served site — never upload these as public assets
+.assetsignore
+wrangler.jsonc

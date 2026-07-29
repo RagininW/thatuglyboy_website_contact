@@ -1,0 +1,11 @@
+// Cloudflare Worker for contact.thatuglyboy.com — static, no build step.
+// Deploy from this folder: `npx wrangler deploy`
+// Separate Worker from the main site (../main-site), so the two deploy
+// independently and neither can break the other.
+{
+  "name": "thatuglyboy-contact",
+  "compatibility_date": "2026-07-01",
+  "assets": {
+    "directory": "."
+  }
+}
