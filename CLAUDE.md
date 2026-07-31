@@ -9,9 +9,15 @@ Single static page listing contact channels. Cloudflare Worker
 push — no manual deploy step, so treat a push as shipping to production.
 `wrangler.jsonc` must stay at the repo root.
 
-Setup still outstanding: this repo has no GitHub remote yet, and the subdomain
-is not bound to the Worker (the DNS record exists, but it needs a route or
-custom domain pointing at `thatuglyboy-contact`).
+Remote: `github.com/RagininW/thatuglyboy_website_contact`
+
+Setup still outstanding — until both are done, pushing does nothing:
+
+1. Connect this GitHub repo to Cloudflare so it builds on push.
+2. Bind `contact.thatuglyboy.com` to the `thatuglyboy-contact` Worker. A
+   proxied A record for the subdomain already exists; Cloudflare rejects a
+   custom domain while it's there, so delete that record first, or use a
+   route instead and keep it as the DNS placeholder.
 
 ## Layout
 
