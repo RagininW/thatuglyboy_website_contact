@@ -3,7 +3,9 @@
 // Separate Worker from the main site (../main-site), so the two deploy
 // independently and neither can break the other.
 {
-  "name": "thatuglyboy-contact",
+  // must match the Worker in Cloudflare, or a deploy creates a second,
+  // unrouted Worker instead of updating the live one
+  "name": "websitecontact",
   "compatibility_date": "2026-07-01",
   "assets": {
     "directory": "."
