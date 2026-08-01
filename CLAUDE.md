@@ -5,9 +5,17 @@ Single static page listing contact channels. Cloudflare Worker
 
 ## Deploying
 
-**Pushing to `main` auto-deploys.** Cloudflare builds from the GitHub repo on
-push — no manual deploy step, so treat a push as shipping to production.
-`wrangler.jsonc` must stay at the repo root.
+**Pushing does NOT deploy.** Unlike `../main-site`, this repo is not connected
+to Workers Builds — the dashboard shows "Manually deployed", not a commit
+message. A push updates GitHub and nothing else. Deploy by hand:
+
+```bash
+npx wrangler deploy
+```
+
+The Worker is `websitecontact`; `wrangler.jsonc` must say exactly that, or a
+deploy silently creates a second, unrouted Worker and the live site never
+changes.
 
 Remote: `github.com/RagininW/thatuglyboy_website_contact`
 
