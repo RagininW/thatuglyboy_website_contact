@@ -11,13 +11,26 @@ push — no manual deploy step, so treat a push as shipping to production.
 
 Remote: `github.com/RagininW/thatuglyboy_website_contact`
 
-Setup still outstanding — until both are done, pushing does nothing:
+The Worker is named `websitecontact` in Cloudflare (not `thatuglyboy-contact`
+as `wrangler.jsonc` says — the dashboard name is what's live).
 
-1. Connect this GitHub repo to Cloudflare so it builds on push.
-2. Bind `contact.thatuglyboy.com` to the `thatuglyboy-contact` Worker. A
-   proxied A record for the subdomain already exists; Cloudflare rejects a
-   custom domain while it's there, so delete that record first, or use a
-   route instead and keep it as the DNS placeholder.
+### Gotcha: routes on the main-site Worker shadow this one
+
+A Worker on a **route** runs before a Worker on a **custom domain**, and a
+static-assets Worker never falls through — it just answers. So a route on the
+`thatuglyboy` Worker that matches this subdomain silently serves the main site
+here instead, even though DNS points the hostname at this Worker.
+
+This already happened once: `contact.thatuglyboy.com` served the main site
+until the offending route was removed from `thatuglyboy`. If this page ever
+starts looking like the main site again, check that Worker's routes first, then
+purge cache. Diagnostic — `app.js` only exists on the main site:
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" https://contact.thatuglyboy.com/app.js
+```
+
+`404` is correct. `200` means the main-site Worker is answering.
 
 ## Layout
 
@@ -28,11 +41,30 @@ referenced across hostnames because that would need CORS headers for the fonts.
 Only `ugly_boy` and `avenir` are declared here. If a heading ever needs the
 `angst` face, copy it over from `../main-site/fonts/` — it isn't in this repo.
 
-## Language
+## Language: the hostname is the language
 
-Reads and writes the same `tub:lang` localStorage key as the main site, so an
-EN/ES choice follows visitors across the two hostnames. Strings live in the
-`I18N` object at the bottom of `index.html`; keep both languages in sync.
+This one page is served on two hostnames — `contact.` is English, `contacto.`
+is Spanish — and `langFromHost()` reads the language off `location.hostname`.
+Test `contacto.` **before** `contact.`, and anchor both at index 0, or
+`websitecontact.…workers.dev` matches too.
+
+`localStorage` cannot carry the choice between the main site and this one: it
+is scoped per *origin*, and every hostname is its own origin. An earlier
+version of this file claimed the shared `tub:lang` key made the choice follow
+visitors across hostnames — it never did. Language crosses origins **in the
+URL** only:
+
+- main site → here: it links to `contact.` or `contacto.` per current language
+- here → main site: the back link carries `?lang=en` / `?lang=es`, which
+  `app.js` consumes, stores, and strips via `replaceState`
+
+`tub:lang` is still written, but it only helps repeat visits to the *same*
+hostname. It's the fallback where neither hostname applies (workers.dev,
+localhost), which is also the only place the EN/ES buttons swap text in place —
+on the real hostnames they navigate, so the URL stays truthful.
+
+Strings live in the `I18N` object at the bottom of `index.html`; keep both
+languages in sync. Adding a language means adding a hostname, not just a key.
 
 Copy register matches the main site: lowercase, declarative, no second person.
 

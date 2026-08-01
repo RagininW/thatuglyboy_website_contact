@@ -234,9 +234,23 @@
     }
   };
 
-  // shares the main site's storage key, so the language choice carries over
-  var LANG = 'en';
-  try { LANG = localStorage.getItem('tub:lang') || 'en'; } catch (e) {}
+  // This page is one Worker served on two hostnames, and the hostname *is* the
+  // language: contact. = en, contacto. = es. That is what carries the choice
+  // across origins — localStorage cannot, since every hostname gets its own.
+  var HOSTS = { en: 'https://contact.thatuglyboy.com', es: 'https://contacto.thatuglyboy.com' };
+  // main site can't read this origin's storage either, so say it in the URL
+  var BACK  = { en: 'https://thatuglyboy.com/?lang=en', es: 'https://thatuglyboy.com/?lang=es' };
+
+  // null on workers.dev or localhost, where neither hostname applies
+  function langFromHost() {
+    var h = location.hostname.replace(/^www\./, '');
+    if (h.indexOf('contacto.') === 0) return 'es';  // test before 'contact.'
+    if (h.indexOf('contact.') === 0) return 'en';
+    return null;
+  }
+
+  var LANG = langFromHost();
+  if (!LANG) { try { LANG = localStorage.getItem('tub:lang'); } catch (e) {} }
   if (!I18N[LANG]) LANG = 'en';
 
   function apply(lang) {
@@ -248,6 +262,8 @@
       if (dict[key] !== undefined) el.textContent = dict[key];
     });
     document.title = dict.title + ' — that ugly boy';
+    var back = document.querySelector('.back');
+    if (back) back.href = BACK[lang];
     document.querySelectorAll('[data-lang]').forEach(function (b) {
       b.classList.toggle('active', b.dataset.lang === lang);
     });
@@ -255,8 +271,12 @@
 
   document.querySelectorAll('[data-lang]').forEach(function (b) {
     b.addEventListener('click', function () {
-      try { localStorage.setItem('tub:lang', b.dataset.lang); } catch (e) {}
-      apply(b.dataset.lang);
+      var next = b.dataset.lang;
+      try { localStorage.setItem('tub:lang', next); } catch (e) {}
+      // on the real hostnames the URL has to stay truthful, so switch by
+      // navigating; elsewhere (workers.dev, localhost) just swap in place
+      if (langFromHost() && langFromHost() !== next) { location.href = HOSTS[next]; return; }
+      apply(next);
     });
   });
 
