@@ -1,26 +1,27 @@
 # contact.thatuglyboy.com
 
 Single static page listing contact channels. Cloudflare Worker
-(`thatuglyboy-contact`) serving this folder as assets. No build step.
+(`websitecontact`) serving this folder as assets. No build step.
 
 ## Deploying
 
-**Pushing does NOT deploy.** Unlike `../main-site`, this repo is not connected
-to Workers Builds — the dashboard shows "Manually deployed", not a commit
-message. A push updates GitHub and nothing else. Deploy by hand:
+**Pushing to `main` auto-deploys.** Connected to Workers Builds, which runs
+`npx wrangler deploy` in the cloud on push — a build lands in well under a
+minute. Treat a push as shipping to production.
 
-```bash
-npx wrangler deploy
-```
+Two things this depends on, both easy to break:
 
-The Worker is `websitecontact`; `wrangler.jsonc` must say exactly that, or a
-deploy silently creates a second, unrouted Worker and the live site never
-changes.
+- `wrangler.jsonc` must say `name: "websitecontact"`. Any other name deploys to
+  a phantom Worker with no custom domains: every build goes green and the live
+  site never changes.
+- `wrangler.jsonc` must stay at the repo root.
+
+Deploying by hand is **not** an option on the current machine — local Node is
+v14, and wrangler needs 18+ (it dies with `Unexpected token '{'` before
+printing anything useful). Cloud builds sidestep that entirely; to restore the
+local path, upgrade Node.
 
 Remote: `github.com/RagininW/thatuglyboy_website_contact`
-
-The Worker is named `websitecontact` in Cloudflare (not `thatuglyboy-contact`
-as `wrangler.jsonc` says — the dashboard name is what's live).
 
 ### Gotcha: routes on the main-site Worker shadow this one
 
