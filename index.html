@@ -234,11 +234,48 @@
     }
   };
 
-  // This page is one Worker served on two hostnames, and the hostname *is* the
-  // language: contact. = en, contacto. = es. That is what carries the choice
-  // across origins — localStorage cannot, since every hostname gets its own.
+  // ---- tub-lang: the choice, shared across every thatuglyboy hostname ------
+  // This is ../main-site/lang-store.js and ../ochre/lang-store.js inlined,
+  // because this site is a single file. Change one, change all three.
+  //
+  // localStorage is keyed by *origin*, so thatuglyboy.com, ochre. and contact.
+  // each get their own private box and none can read the others'. A cookie is
+  // keyed by *domain*, and one written against `.thatuglyboy.com` is sent to
+  // every host under it — the only client-side store the three sites share.
+  // localStorage is still written, for hostnames the cookie domain cannot
+  // cover (localhost, *.workers.dev), where there is nothing to share with.
+  function sharedDomain() {
+    var h = String(location.hostname || '').toLowerCase();
+    if (h === 'thatuglyboy.com' || h.slice(-16) === '.thatuglyboy.com') {
+      return '.thatuglyboy.com';
+    }
+    return null;
+  }
+  function readLangCookie() {
+    try {
+      var m = String(document.cookie).match(/(?:^|;\s*)tub_lang=([^;]*)/);
+      return m ? decodeURIComponent(m[1]) : null;
+    } catch (e) { return null; }
+  }
+  function persistLang(lang) {
+    if (lang !== 'en' && lang !== 'es') return;
+    var d = sharedDomain();
+    // No Secure flag: it would drop the cookie on http://localhost, and the
+    // value is a two-letter display preference, not a credential.
+    var c = 'tub_lang=' + encodeURIComponent(lang)
+          + '; path=/; max-age=' + (60 * 60 * 24 * 365) + '; SameSite=Lax';
+    if (d) c += '; domain=' + d;
+    try { document.cookie = c; } catch (e) {}
+    try { localStorage.setItem('tub:lang', lang); } catch (e) {}
+  }
+
+  // This page is one Worker served on two hostnames, and here the hostname
+  // *is* the language: contact. = en, contacto. = es. That still wins locally —
+  // the URL has to stay truthful — but the choice is now also written to the
+  // shared cookie on arrival, so landing here in Spanish sets Spanish for
+  // thatuglyboy.com and ochre. too.
   var HOSTS = { en: 'https://contact.thatuglyboy.com', es: 'https://contacto.thatuglyboy.com' };
-  // main site can't read this origin's storage either, so say it in the URL
+  // ?lang= stays on the back link as the fallback for a blocked cookie
   var BACK  = { en: 'https://thatuglyboy.com/?lang=en', es: 'https://thatuglyboy.com/?lang=es' };
 
   // null on workers.dev or localhost, where neither hostname applies
@@ -250,8 +287,10 @@
   }
 
   var LANG = langFromHost();
+  if (!LANG) { LANG = readLangCookie(); }
   if (!LANG) { try { LANG = localStorage.getItem('tub:lang'); } catch (e) {} }
   if (!I18N[LANG]) LANG = 'en';
+  persistLang(LANG);
 
   function apply(lang) {
     LANG = lang;
@@ -272,7 +311,7 @@
   document.querySelectorAll('[data-lang]').forEach(function (b) {
     b.addEventListener('click', function () {
       var next = b.dataset.lang;
-      try { localStorage.setItem('tub:lang', next); } catch (e) {}
+      persistLang(next);
       // on the real hostnames the URL has to stay truthful, so switch by
       // navigating; elsewhere (workers.dev, localhost) just swap in place
       if (langFromHost() && langFromHost() !== next) { location.href = HOSTS[next]; return; }
