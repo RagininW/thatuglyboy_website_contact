@@ -77,16 +77,27 @@
   .back .arr { display: inline-block; margin-right: 8px; transition: transform .2s; }
   .back:hover .arr { transform: translateX(-3px); }
 
-  .lang-switch { display: flex; align-items: center; gap: 6px; }
-  .lang-btn {
-    background: none; border: none; padding: 0; cursor: pointer;
-    font: inherit; color: var(--dim);
-    letter-spacing: .26em; text-transform: uppercase;
-    transition: color .2s;
+  /* Kept in step with ../main-site: a bordered pair with the live side filled,
+     rather than two dim words that read as a caption. */
+  .lang-switch {
+    display: inline-flex; align-items: stretch;
+    border: 1px solid var(--faint);
+    border-radius: 4px;
+    overflow: hidden;
   }
-  .lang-btn:hover { color: var(--fg); }
-  .lang-btn.active { color: var(--accent); }
-  .lang-switch .sep { color: var(--faint); }
+  .lang-btn {
+    background: none; border: none; cursor: pointer;
+    font: inherit; font-size: 12px; line-height: 1;
+    padding: 6px 11px;
+    color: var(--dim);
+    letter-spacing: .14em; text-transform: uppercase;
+    transition: color .15s, background .15s;
+  }
+  .lang-btn + .lang-btn { border-left: 1px solid var(--faint); }
+  .lang-btn:hover { color: var(--fg); background: rgba(255,255,255,.05); }
+  .lang-btn.active { color: var(--bg); background: var(--accent); }
+  .lang-btn.active:hover { color: var(--bg); background: var(--accent); }
+  .lang-switch .sep { display: none; }
 
   /* ---------- masthead ---------- */
   main { flex: 1; padding: 72px 0 0; }
