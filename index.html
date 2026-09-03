@@ -249,7 +249,7 @@
   // This is ../main-site/lang-store.js and ../ochre/lang-store.js inlined,
   // because this site is a single file. Change one, change all three.
   //
-  // localStorage is keyed by *origin*, so thatuglyboy.com, ochre. and contact.
+  // localStorage is keyed by *origin*, so thatuglyboy.com, carvedinstone. and
   // each get their own private box and none can read the others'. A cookie is
   // keyed by *domain*, and one written against `.thatuglyboy.com` is sent to
   // every host under it — the only client-side store the three sites share.
@@ -284,7 +284,7 @@
   // *is* the language: contact. = en, contacto. = es. That still wins locally —
   // the URL has to stay truthful — but the choice is now also written to the
   // shared cookie on arrival, so landing here in Spanish sets Spanish for
-  // thatuglyboy.com and ochre. too.
+  // thatuglyboy.com and carvedinstone. too.
   var HOSTS = { en: 'https://contact.thatuglyboy.com', es: 'https://contacto.thatuglyboy.com' };
   // ?lang= stays on the back link as the fallback for a blocked cookie
   var BACK  = { en: 'https://thatuglyboy.com/?lang=en', es: 'https://thatuglyboy.com/?lang=es' };

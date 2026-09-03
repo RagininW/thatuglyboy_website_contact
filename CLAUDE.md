@@ -63,8 +63,9 @@ because it is scoped per *domain* — `persistLang()` writes `tub_lang` against
 `.thatuglyboy.com`, which every host under it receives.
 
 So arriving on `contacto.` now sets Spanish for `thatuglyboy.com` and
-`ochre.thatuglyboy.com` as well. The hostname still decides the language *here*
-(the URL has to stay truthful), and it is written to the cookie on arrival.
+`carvedinstone.thatuglyboy.com` as well. The hostname still decides the
+language *here* (the URL has to stay truthful), and it is written to the cookie
+on arrival.
 
 That cookie code is `../main-site/lang-store.js` and `../ochre/lang-store.js`
 inlined, since this site is one file. **Change one, change all three.**
@@ -88,6 +89,7 @@ Copy register matches the main site: lowercase, declarative, no second person.
 
 - `../main-site` — separate repo and Worker for `thatuglyboy.com`. Design tokens
   (colors, fonts) are duplicated here; if they change there, update them here too.
-- `../ochre` — separate repo and Worker for `ochre.thatuglyboy.com`. It runs its
-  own palette (the game's), so it is *not* a place to propagate token changes —
-  but it inherits the route-shadowing gotcha above.
+- `../ochre` — separate repo and Worker for `carvedinstone.thatuglyboy.com`;
+  the folder and repo keep an older title. It runs its own palette (the
+  game's), so it is *not* a place to propagate token changes — but it inherits
+  the route-shadowing gotcha above.
